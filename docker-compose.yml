@@ -1,0 +1,82 @@
+# Creado por Ridivi
+# Fecha Creación: 27/09/2020
+# Fecha Actualización: 17/05/2022
+# Versión: 3.7
+
+version: "3.7"
+
+services:
+  
+  ## POSTGRESQL SERVER ##
+  postgresql:
+    container_name: postgresql_container
+    image: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      PGDATA: /data/postgres
+    volumes:
+       - postgres:/data/postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - ridivi-net
+    restart: unless-stopped
+  
+    ## PGADMIN (FOR POSTGRESQL ADMINISTRATION) ##
+  pgadmin:
+    container_name: pgadmin_container
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+    volumes:
+       - pgadmin:/root/.pgadmin
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    networks:
+      - ridivi-net
+    restart: unless-stopped
+    depends_on: 
+      - postgresql  
+  
+  ## KEYCLOAK SERVER ##
+  keycloak:
+    container_name: keycloak_container
+    image: quay.io/keycloak/keycloak:17.0.0-legacy
+    environment:
+      # SE COMENTAN ESTAS DOS LINEAS, SE DEBEN EJECUTAR SOLO CUANDO SE CREA EL CONTENEDOR POR PRIMERA VEZ
+      #DESPUES DE CREADO SE DEBEN COMENTAR
+      # Credentials for admin account
+      #KEYCLOAK_USER: admin
+      #KEYCLOAK_PASSWORD: Pa55w0rd
+      # Credentials for storing into an external database
+      DB_VENDOR: POSTGRES
+      DB_ADDR: postgresql_container
+      DB_PORT: 5432
+      DB_DATABASE: keycloak
+      DB_USER: postgres
+      DB_SCHEMA: public
+      DB_PASSWORD: changeme
+      # Uncomment the line below if you want to specify JDBC parameters. The parameter below is just an example, and it shouldn't be used in production without knowledge. It is highly recommended that you read the PostgreSQL JDBC driver documentation in order to use it.
+      #JDBC_PARAMS: "ssl=true"
+      ## ADITIONAL PARAMETERS
+      PROXY_ADDRESS_FORWARDING: "true"
+      TZ: "America/Costa_Rica"
+    ports:
+      - 8180:8080
+    networks:
+    - ridivi-net
+    restart: always
+    depends_on:
+    - postgresql
+
+networks:
+  ridivi-net:
+    driver: bridge
+
+volumes:
+  postgres:
+    driver: local
+  pgadmin:
+    driver: local
