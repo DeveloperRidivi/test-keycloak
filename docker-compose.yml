@@ -38,12 +38,30 @@ services:
       - ridivi-net
     restart: unless-stopped
     depends_on: 
-      - postgresql  
+      - postgresql    
+  
+  # MS SQL SERVER ##
+  # mssql:
+  #   container_name: mssql_container
+  #   image: mcr.microsoft.com/mssql/server
+  #   ports:
+  #       - "1438:1433"
+  #   environment:
+  #       - ACCEPT_EULA=Y
+  #       - SA_PASSWORD=Password!23
+  #       - MSSQL_PID=Developer
+  # mssqlscripts:
+  #   # container_name: mssqlscript_container
+  #   image: mcr.microsoft.com/mssql-tools
+  #   depends_on:
+  #       - mssql
+  #   command: /bin/bash -c 'until /opt/mssql-tools/bin/sqlcmd -S mssql -U carrillodev -P "Password!23" -Q "create database keycloak"; do sleep 5; done'
   
   ## KEYCLOAK SERVER ##
   keycloak:
     container_name: keycloak_container
-    image: quay.io/keycloak/keycloak:17.0.0-legacy
+    # image: quay.io/keycloak/keycloak:17.0.0-legacy
+    image: quay.io/keycloak/keycloak:legacy
     environment:
       # SE COMENTAN ESTAS DOS LINEAS, SE DEBEN EJECUTAR SOLO CUANDO SE CREA EL CONTENEDOR POR PRIMERA VEZ
       #DESPUES DE CREADO SE DEBEN COMENTAR
@@ -52,12 +70,16 @@ services:
       #KEYCLOAK_PASSWORD: Pa55w0rd
       # Credentials for storing into an external database
       DB_VENDOR: POSTGRES
+      # DB_VENDOR: mssql
       DB_ADDR: postgresql_container
+      # DB_ADDR: mssql_container
       DB_PORT: 5432
       DB_DATABASE: keycloak
       DB_USER: postgres
-      DB_SCHEMA: public
+      # DB_USER: sa
+      # DB_SCHEMA: dbo
       DB_PASSWORD: changeme
+      # DB_PASSWORD: Password!23
       # Uncomment the line below if you want to specify JDBC parameters. The parameter below is just an example, and it shouldn't be used in production without knowledge. It is highly recommended that you read the PostgreSQL JDBC driver documentation in order to use it.
       #JDBC_PARAMS: "ssl=true"
       ## ADITIONAL PARAMETERS
@@ -70,6 +92,8 @@ services:
     restart: always
     depends_on:
     - postgresql
+    # - mssql  
+    # - mssqlscripts
 
 networks:
   ridivi-net:
@@ -80,3 +104,5 @@ volumes:
     driver: local
   pgadmin:
     driver: local
+  # mssql:
+  #   driver: local
