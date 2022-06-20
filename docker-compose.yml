@@ -1,0 +1,42 @@
+# Creado por Ridivi
+# Fecha Creación: 27/09/2020
+# Fecha Actualización: 17/05/2022
+# Versión: 3.7
+
+version: "3.7"
+
+services:
+  
+  ## KEYCLOAK SERVER ##
+  keycloak-server:
+    # container_name: keycloak_container
+    # image: prebuilt_keycloak:latest
+    build: 
+      context: ./dockercompose/
+      dockerfile: ./Dockerfile
+    environment:
+      # Credentials for admin account
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin_123
+      # Credentials for storing into an external database
+      DB_VENDOR: mssql
+      DB_ADDR: jdbc:sqlserver://34.68.47.139
+      DB_DATABASE: keycloak_dev
+      DB_USER: ridivi_jose
+      DB_PASSWORD: kUWVe5YBCSU3xsbv
+      # DB_PORT: 1433
+      # DB_SCHEMA: dbo
+    ports:
+      - 8180:8080
+    # networks:
+    # - ridivi-net
+    # restart: always
+    # command: '/opt/keycloak/bin/kc.sh start-dev'
+
+# volumes:
+#   mssql:
+#     driver: local
+
+# networks:
+#   ridivi-net:
+#     driver: bridge
